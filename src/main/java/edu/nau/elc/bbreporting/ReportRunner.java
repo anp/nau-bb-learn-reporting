@@ -105,7 +105,7 @@ public class ReportRunner {
                 int dbPort = dbPortSpec.value(opts);
 
                 // after retreiving the required arguments, let's create a default JDBC connection string
-                String connectionString = "jdbc:oracle:thin:@// " + dbHost + ":" + dbPort + "/ORACLE";
+                String connectionString = "jdbc:oracle:thin:@//" + dbHost + ":" + dbPort + "/ORACLE";
 
                 // are we going to use the ssh tunnel? can only do it if these three options are declared with args
                 boolean sshTunnel =
@@ -140,7 +140,7 @@ public class ReportRunner {
                     log.info("SSH tunnel created.");
 
                     // change the connection from a remote one (as defined above) to a local one that points to the tunnel
-                    connectionString = "jdbc:oracle:thin:@// localhost:" + localPort + "/ORACLE";
+                    connectionString = "jdbc:oracle:thin:@//localhost:" + localPort + "/ORACLE";
                 }
 
                 // check to make sure we're on the classpath -- gradle is looking for this under libs/ojdbc7.jar
