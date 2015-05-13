@@ -28,8 +28,8 @@ That's it! But it's actually not.
 
 ###Running Reports
 
-
-```java -jar build/libs/nau-bb-learn-reporting-1.0-capsule.jar --help
+```
+java -jar build/libs/nau-bb-learn-reporting-1.0-capsule.jar --help
 Option                             Description                           
 ------                             -----------                           
 --db-host                          Address for Bb Learn OpenDB server.   
@@ -54,8 +54,8 @@ Option                             Description
 --ssh-user                         Username for SSH proxy.               
 --stale-courses                    Run a report to find non-SIS courses  
                                      which haven't been accessed in over 
-                                     a year.```
-
+                                     a year.
+```
 ###Changing Reports, Adding New Reports
 
 Read through the source. There's nothing magical here, but it may be a convenient way to provide some structure to your institution's current SQL-based reporting, especially if you have to manually fire up an SSH tunnel every time you do it. As you can see, it's under the MIT license currently. Please attribute Northern Arizona University, as I wrote it while under their employ.
