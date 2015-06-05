@@ -88,7 +88,8 @@ public class HardlinkCoursesReport implements Report {
 				"  cm.course_id\n" +
 				"from bblearn.course_main cm, bblearn.course_contents cc, bblearn.course_contents_files ccf, bblearn.files f\n" +
 				" WHERE\n" +
-				"   f.link_name LIKE '%.htm%'\n" +
+				"   NOT REGEXP_LIKE(f.link_name,'(DVD|VT|T)[0-9]{2,5}_(.+).html','i')\n" +
+				"   AND f.link_name LIKE '%.htm%'\n" +
 				"   AND f.pk1 = ccf.files_pk1\n" +
 				"   AND ccf.course_contents_pk1 = cc.pk1\n" +
 				"   AND cc.cnthndlr_handle = 'resource/x-bb-file'\n" +
@@ -146,6 +147,8 @@ public class HardlinkCoursesReport implements Report {
 			for (String courseID : hardlinkCourses) {
 				writer.println(courseID);
 			}
+
+			log.info("Hardlink courses report done. " + hardlinkCourses.size() + " courses found. Happy hunting!");
 		} catch (SQLException sqe) {
 			log.error("Error querying.", sqe);
 		}
