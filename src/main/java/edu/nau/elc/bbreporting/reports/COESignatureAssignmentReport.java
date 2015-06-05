@@ -1,8 +1,8 @@
 package edu.nau.elc.bbreporting.reports;
 
 import edu.nau.elc.bbreporting.domain.Course;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.util.*;
 
 public class COESignatureAssignmentReport implements Report {
 
-    private static Logger log = LoggerFactory.getLogger(COESignatureAssignmentReport.class);
+	private static Logger log = LogManager.getLogger(COESignatureAssignmentReport.class);
 
     int term;
 

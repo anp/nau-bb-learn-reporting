@@ -29,32 +29,22 @@ That's it! But it's actually not.
 ###Running Reports
 
 ```
-java -jar build/libs/nau-bb-learn-reporting-1.0-capsule.jar --help
-Option                             Description                           
-------                             -----------                           
---db-host                          Address for Bb Learn OpenDB server.   
---db-pass                          Password for Bb Learn OpenDB.         
---db-port <Integer>                Port to connect to on Bb Learn OpenDB 
-                                     server.                             
---db-user                          Username for Bb Learn OpenDB.         
---force-completion <Integer>       Run a report to find tests in a term  
-                                     with Force Completion. Requires 4-  
-                                     digit term code argument.           
---help                                                                   
---local-port <Integer>             Port to tunnel SSH to locally         
-                                     (default: 1521).                    
---report-dir <File>                Directory to save report to.          
---signature-assignments <Integer>  Run a report on rubrics and signature 
-                                     assignments in COE courses. Requires
-                                     4-digit term code argument.         
---ssh-host                         Address for SSH proxy server.         
---ssh-pass                         Password for SSH proxy.               
---ssh-port <Integer>               Port to connect to for SSH proxy      
-                                     (default: 22).                      
---ssh-user                         Username for SSH proxy.               
---stale-courses                    Run a report to find non-SIS courses  
-                                     which haven't been accessed in over 
-                                     a year.
+java -jar build/libs/nau-bb-learn-reporting-1.0-capsule.jar --help                     
+Option                               Description                           
+------                               -----------                           
+--config <File>                      Path to properties file.              
+--help                                                                     
+--report-force-completion <Integer>  Find tests in a term with Force       
+                                       Completion. Requires 4-digit term   
+                                       code.                               
+--report-hardlink-courses <Integer>  Find courses that should be checked   
+                                       for hardlinks. Requires 4-digit term
+                                       code.                               
+--report-signature-assignments       Find rubrics and signature assignments
+  <Integer>                            in COE courses. Requires 4-digit    
+                                       term code.                          
+--report-stale-courses               Find non-SIS courses which haven't    
+                                       been accessed in over a year.   
 ```
 ###Changing Reports, Adding New Reports
 

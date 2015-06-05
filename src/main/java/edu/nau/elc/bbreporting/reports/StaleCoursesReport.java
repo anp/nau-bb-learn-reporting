@@ -1,7 +1,7 @@
 package edu.nau.elc.bbreporting.reports;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 
 public class StaleCoursesReport implements Report {
 
-    private static Logger log = LoggerFactory.getLogger(StaleCoursesReport.class);
+	private static Logger log = LogManager.getLogger(StaleCoursesReport.class);
 
     public StaleCoursesReport() {
     }
