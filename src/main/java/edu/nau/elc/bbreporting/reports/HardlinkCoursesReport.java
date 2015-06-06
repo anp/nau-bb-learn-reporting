@@ -13,17 +13,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class HardlinkCoursesReport implements Report {
 
 	private static Logger log = LogManager.getLogger(HardlinkCoursesReport.class);
 
 	int term;
+	boolean aggressive;
 
-	public HardlinkCoursesReport(int termCode) {
+	public HardlinkCoursesReport(int termCode, boolean aggressive) {
 		term = termCode;
+		this.aggressive = aggressive;
 	}
 
 	/**
@@ -101,7 +103,7 @@ public class HardlinkCoursesReport implements Report {
 
 			contentStatement.setString(1, term + "-NAU00-" + firstPrefixLetter + "%");
 
-			Set<String> hardlinkCourses = new HashSet<>();
+			Set<String> hardlinkCourses = new TreeSet<>();
 
 
 			if (contentStatement.execute()) {
@@ -123,32 +125,30 @@ public class HardlinkCoursesReport implements Report {
 			}
 			contentStatement.close();
 
+			if (aggressive) {
+				PreparedStatement htmlFileStatement = sqlConnection.prepareStatement(htmlFilesQuery);
 
-			PreparedStatement htmlFileStatement = sqlConnection.prepareStatement(htmlFilesQuery);
+				// the term code goes at the beginning of the course ID, e.g. 1151-NAU00-ENG-105-SEC01-5555.NAU-PSSIS
+				htmlFileStatement.setString(1, term + "-NAU00-" + firstPrefixLetter + "%");
 
-			// the term code goes at the beginning of the course ID, e.g. 1151-NAU00-ENG-105-SEC01-5555.NAU-PSSIS
-			htmlFileStatement.setString(1, term + "-NAU00-" + firstPrefixLetter + "%");
+				if (htmlFileStatement.execute()) {
+					// not strictly necessary but it runs a while so status updates are good
+					log.info("Deployed HTML file results for course prefixes starting with \'" + firstPrefixLetter
+							+ "\' returned...");
 
-			if (htmlFileStatement.execute()) {
-				// not strictly necessary but it runs a while so status updates are good
-				log.info("Deployed HTML file results for course prefixes starting with \'" + firstPrefixLetter
-						+ "\' returned...");
+					ResultSet resultSet = htmlFileStatement.getResultSet();
 
-				ResultSet resultSet = htmlFileStatement.getResultSet();
+					while (resultSet.next()) {
+						hardlinkCourses.add(resultSet.getString("COURSE_ID"));
+					}
 
-				while (resultSet.next()) {
-					hardlinkCourses.add(resultSet.getString("COURSE_ID"));
+					resultSet.close();
 				}
-
-				resultSet.close();
+				htmlFileStatement.close();
 			}
-			htmlFileStatement.close();
-
 			for (String courseID : hardlinkCourses) {
 				writer.println(courseID);
 			}
-
-			log.info("Hardlink courses report done. " + hardlinkCourses.size() + " courses found. Happy hunting!");
 		} catch (SQLException sqe) {
 			log.error("Error querying.", sqe);
 		}
@@ -171,24 +171,36 @@ public class HardlinkCoursesReport implements Report {
 	}
 
 	private boolean isHardLink(String url) {
-		if (url.length() == 0) return false;
-
+		boolean isHardLink;
 		url = url.replaceAll("@X@.*?@X@", "https://bblearn.nau.edu/");
 
-		boolean isHardLink;
+		if (url.startsWith("%20")) url = url.replaceFirst("%20", "");
+
 		if (url.contains("xid") && url.contains("bbcswebdav")) {
 			isHardLink = false;
-		} else if (url.startsWith("http://") && !url.contains("bblearn")) {
+
+
+		} else if ((url.startsWith("http://") || url.startsWith("https://") || url.startsWith("www"))
+				&& !url.contains("bblearn")) {
 			isHardLink = false;
+
+		} else if (url.startsWith("/images/ci/")) {
+			isHardLink = false;
+
+
 		} else if (!url.startsWith("https://") && !url.startsWith("http://")
 				&& !url.startsWith("javascript:")
 				&& !url.startsWith("mailto:") && !url.startsWith("#")) {
-			isHardLink = true;
-		} else if (url.contains("bbcswebdav")
-				&& !url.contains("/xid-") && !url.contains("vtbe-tinymce")) {
-			isHardLink = true;
-		} else isHardLink = url.contains("courses") || url.contains("webapp");
+			isHardLink = aggressive;
 
+
+		} else isHardLink = (url.contains("courses") || url.contains("webapp") || url.contains("bbcswebdav"))
+				&& (!url.contains("execute/viewDocumentation?")
+				&& !url.contains("wvms-bb-BBLEARN")
+				&& !url.contains("bb-collaborate-BBLEARN")
+				&& !url.contains("/xid-")
+				&& !url.contains("webapps/vtbe-tinymce/tiny_mce")
+				&& !url.contains("webapps/login"));
 		return isHardLink;
 	}
 }

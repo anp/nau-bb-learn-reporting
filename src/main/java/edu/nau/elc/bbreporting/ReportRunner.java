@@ -63,6 +63,8 @@ public class ReportRunner {
 					"Find courses that should be checked for hardlinks. Requires 4-digit term code.")
 					.withRequiredArg().ofType(Integer.class);
 
+			parser.accepts("greedy", "Flag to make certain reports extra detailed (currently only hardlinks).");
+
 			parser.accepts("help").forHelp();
 
 			OptionSet opts = parser.parse(args);
@@ -191,15 +193,18 @@ public class ReportRunner {
 			} else if (opts.has(hardlinkCoursesTermSpec)) {
 				log.info("Running hardlink courses report, no other reports will be run.");
 
+				boolean aggressiveHardlinks = opts.has("greedy");
 				int term = hardlinkCoursesTermSpec.value(opts);
 
 				if (termCodePattern.matcher(Integer.toString(term)).matches()) {
 					// setup the report file
 					File hardlinkCoursesReportFile = new File(reportsFolder.getAbsolutePath() + File.separator
-							+ "hardlink_courses_report_" + term + "_" + nowStamp + ".txt");
+							+ "hardlink_courses_report_"
+							+ (aggressiveHardlinks ? "aggressive_" : "unaggressive_")
+							+ term + "_" + nowStamp + ".txt");
 
 					// run the report!
-					Report hardLinkCourses = new HardlinkCoursesReport(term);
+					Report hardLinkCourses = new HardlinkCoursesReport(term, aggressiveHardlinks);
 					hardLinkCourses.runReport(connection, hardlinkCoursesReportFile);
 
 					log.info("Hardlink courses report done.");

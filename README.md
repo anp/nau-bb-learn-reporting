@@ -29,10 +29,11 @@ That's it! But it's actually not.
 ###Running Reports
 
 ```
-java -jar build/libs/nau-bb-learn-reporting-1.0-capsule.jar --help                     
 Option                               Description                           
 ------                               -----------                           
 --config <File>                      Path to properties file.              
+--greedy                             Flag to make certain reports extra    
+                                       detailed (currently only hardlinks).
 --help                                                                     
 --report-force-completion <Integer>  Find tests in a term with Force       
                                        Completion. Requires 4-digit term   
@@ -44,7 +45,7 @@ Option                               Description
   <Integer>                            in COE courses. Requires 4-digit    
                                        term code.                          
 --report-stale-courses               Find non-SIS courses which haven't    
-                                       been accessed in over a year.   
+                                       been accessed in over a year.  
 ```
 ###Changing Reports, Adding New Reports
 
