@@ -6,12 +6,13 @@ import logging
 import re
 import time
 
-import cx_Oracle as oracle
+import cx_Oracle
 
 import nau_bb_reporting.ssh_tunnel as ssh
 import nau_bb_reporting.housekeeping as housekeeping
 import nau_bb_reporting.reports.stale_courses as stale_courses
 import nau_bb_reporting.reports.force_completion as force_completion
+
 
 
 
@@ -64,9 +65,9 @@ if using_ssh_tunnel:
         time.sleep(0.5)
 
 # fire up Oracle
-dsn = oracle.makedsn('localhost', local_port, 'ORACLE') if using_ssh_tunnel \
-    else oracle.makedsn(db_host, db_port, 'ORACLE')
-db = oracle.connect(db_user, db_pass, dsn)
+dsn = cx_Oracle.makedsn('localhost', local_port, 'ORACLE') if using_ssh_tunnel \
+    else cx_Oracle.makedsn(db_host, db_port, 'ORACLE')
+db = cx_Oracle.connect(db_user, db_pass, dsn)
 log.info("Database connected.")
 
 # start preparing items which apply to most/all reports
