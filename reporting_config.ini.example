@@ -1,0 +1,19 @@
+[PATHS]
+report_dir = #location all reports will be saved
+
+[OPENDB]
+db_host = #opendb ip address or FQDN
+db_port = #port to connect to on db server
+db_user = #username to connect with
+db_pass = #password to connect with
+
+[SSH PROXY]
+#OPTIONAL KEYS, REMOVE OR COMMENT OUT IF NOT USING SSH TUNNELING
+ssh_host = #address of ssh proxy
+ssh_port = #port to connect to on proxy, defaults to 22 if not specified
+local_port = #port to tunnel to locally, defaults to 1521 if not specified
+ssh_user = #username on ssh proxy
+ssh_pass = #password on ssh proxy
+
+[LOG]
+log_file = nau-bb-reporting.log
