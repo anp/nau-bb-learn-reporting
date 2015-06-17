@@ -12,7 +12,7 @@ log = logging.getLogger('nau_bb_reporting.reports.stale_courses')
 query = """
 SELECT *
 FROM
-  (SELECT last_access_date, cm.course_id, cm.course_name
+  (SELECT last_access_date, cm.dtcreated, cm.course_id, cm.course_name
     FROM bblearn.course_users cu, bblearn.course_main cm
     WHERE cu.crsmain_pk1 = cm.pk1
           AND cm.course_id NOT LIKE '%.NAU-PSSIS'
@@ -22,10 +22,11 @@ FROM
     ORDER BY last_access_date DESC
   )
 WHERE last_access_date <= trunc(sysdate) - 365
-order by last_access_date ASC
+  AND LAST_ACCESS_DATE > DTCREATED
+order by COURSE_ID ASC
 """
 
-result_columns = ['last access', 'course id', 'course name']
+result_columns = ['last access', 'date created', 'course id', 'course name']
 
 
 def run(connection, out_file_path):
@@ -39,6 +40,6 @@ def run(connection, out_file_path):
     df = pd.DataFrame(cur.fetchall(), columns=result_columns)
 
     log.info("Writing to excel file...")
-    df.to_excel(out_file_path, sheet_name='stale courses', index=False)
+    df.to_excel(out_file_path, sheet_name='stale non-credit courses', index=False, encoding='UTF-8', na_rep='N/A')
 
     log.info("Done with stale courses report!")
