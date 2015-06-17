@@ -77,7 +77,7 @@ def run(term, connection, out_file_path):
         path_list = [e.replace('VISTA_ORGANIZER_PAGES.label', 'Course Content') for e in path_list]
         path_list = [e.replace('COURSE_DEFAULT.Content.CONTENT_LINK.label', 'Content') for e in path_list]
 
-        row['Path to Test'] = " > ".join(path_list[:-1])
+        row['Path to Test'] = " > ".join(path_list[:-2])
 
     df = pd.DataFrame(results)
 

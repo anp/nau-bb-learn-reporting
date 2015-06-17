@@ -14,8 +14,6 @@ import nau_bb_reporting.reports.stale_courses as stale_courses
 import nau_bb_reporting.reports.force_completion as force_completion
 
 
-
-
 # parse arguments
 args = housekeeping.parse_parameters()
 
@@ -97,7 +95,6 @@ elif report == 'force-completion':
 
     report_path = report_directory + os.sep + term + '-force-completion-' + timestamp + '.xls'
     force_completion.run(term=term, connection=db, out_file_path=report_path)
-
 
 elif report == 'hardlinks':
     if term is None:
