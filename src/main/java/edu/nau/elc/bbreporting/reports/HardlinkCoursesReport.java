@@ -172,13 +172,16 @@ public class HardlinkCoursesReport implements Report {
 
 	private boolean isHardLink(String url) {
 		boolean isHardLink;
-		url = url.replaceAll("@X@.*?@X@", "https://bblearn.nau.edu/");
+		url = url.replace("@X@EmbeddedFile.requestUrlStub@X@", "https://bblearn.nau.edu/");
 
 		if (url.startsWith("%20")) url = url.replaceFirst("%20", "");
 
 		if (url.contains("xid") && url.contains("bbcswebdav")) {
 			isHardLink = false;
 
+
+		} else if (url.contains("iris.nau.edu/owa/redir.aspx?")) {
+			isHardLink = true;
 
 		} else if ((url.startsWith("http://") || url.startsWith("https://") || url.startsWith("www"))
 				&& !url.contains("bblearn")) {

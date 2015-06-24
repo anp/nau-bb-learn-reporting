@@ -14,6 +14,7 @@ setup(name="nau-bb-learn-reporting",
           "cx_Oracle>=5.1.3",
           "paramiko>=1.15.2",
           "pandas>=0.16.2",
-          "xlwt>=1.0.0"
+          "xlwt>=1.0.0",
+          "beautifulsoup4>=4.3.2"
       ],
       )

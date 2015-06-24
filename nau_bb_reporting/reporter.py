@@ -12,6 +12,8 @@ import nau_bb_reporting.ssh_tunnel as ssh
 import nau_bb_reporting.housekeeping as housekeeping
 import nau_bb_reporting.reports.stale_courses as stale_courses
 import nau_bb_reporting.reports.force_completion as force_completion
+import nau_bb_reporting.reports.hardlinks as hardlinks
+
 
 
 # parse arguments
@@ -82,7 +84,7 @@ timestamp = time.strftime('%Y-%m-%d_%H%M%S')
 
 # find which report is needed
 report = args['report']
-greedy = True if 'greedy' in args else False
+greedy = args['greedy']
 if report == 'stale-courses':
     # run stale courses report
     report_path = report_directory + os.sep + 'stale-courses-' + timestamp + '.xls'
@@ -101,8 +103,9 @@ elif report == 'hardlinks':
         log.error("Trying to run hardlinks report, but no term provided! Exiting...")
         exit(9)
 
-    log.info("Running hardlinks report for %s.", term)
-    # TODO run hardlink report
+    hardlink_id = 'greedy-' if greedy else 'lazy-'
+    report_path = report_directory + os.sep + term + '-hardlinks-' + hardlink_id + timestamp + '.xls'
+    hardlinks.run(term=term, connection=db, out_file_path=report_path, greedy=greedy)
 
 # close all connections
 db.close()

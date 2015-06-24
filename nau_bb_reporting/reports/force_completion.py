@@ -55,13 +55,14 @@ result_columns = ['PI UID', 'PI First Name', 'PI Last Name', 'PI Email',
 def run(term, connection, out_file_path):
     log.info("Running force completion report for %s.", term)
     main_cur = connection.cursor()
+    main_cur.prepare(first_query)
 
     course_id_like = term + '-NAU00-%'
 
     results = []
     for letter in ascii_lowercase:
         user_id_like = letter + '%'
-        main_cur.execute(first_query, course_id_like=course_id_like, user_id_like=user_id_like)
+        main_cur.execute(None, course_id_like=course_id_like, user_id_like=user_id_like)
         results.extend([dict(zip(result_columns, row)) for row in main_cur.fetchall()])
 
     log.info("Found all %s tests with Force Completion.", term)
