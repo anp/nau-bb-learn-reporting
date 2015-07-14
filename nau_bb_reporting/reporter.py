@@ -13,6 +13,12 @@ import nau_bb_reporting.housekeeping as housekeeping
 import nau_bb_reporting.reports.stale_courses as stale_courses
 import nau_bb_reporting.reports.force_completion as force_completion
 import nau_bb_reporting.reports.hardlinks as hardlinks
+import nau_bb_reporting.reports.mediafiles as mediafiles
+import nau_bb_reporting.reports.librarymovies as librarymovies
+import nau_bb_reporting.reports.content_system.mediafiles as cs_mediafiles
+
+
+
 
 
 
@@ -44,6 +50,11 @@ ssh_port = int(ssh_conf.get('port', 22))
 local_port = int(ssh_conf.get('local_port', 1521))
 ssh_user = ssh_conf['user']
 ssh_pass = ssh_conf['pass']
+
+webdav_config = config['WEBDAV']
+wd_host = webdav_config['host']
+wd_user = webdav_config['user']
+wd_pass = webdav_config['pass']
 
 # validate configuration
 if db_host is None or db_port is None or db_user is None or db_pass is None:
@@ -106,6 +117,27 @@ elif report == 'hardlinks':
     hardlink_id = 'greedy-' if greedy else 'lazy-'
     report_path = report_directory + os.sep + term + '-hardlinks-' + hardlink_id + timestamp + '.xls'
     hardlinks.run(term=term, connection=db, out_file_path=report_path, greedy=greedy)
+
+elif report == 'mediafiles':
+    if term is None:
+        log.error("Cannot run media files report, no term was provided! Exiting...")
+        exit(10)
+
+    report_path = report_directory + os.sep + term + '-mediafiles-' + timestamp + '.xls'
+
+    if greedy:
+        cs_mediafiles.run(webdav_host=wd_host, webdav_user=wd_user, webdav_pass=wd_pass, connection=db,
+                          out_file_path=report_path, term=term)
+    else:
+        mediafiles.run(term=term, connection=db, out_file_path=report_path)
+
+elif report == 'librarymovies':
+    if term is None:
+        log.error('Cannor run library movies report, no term was provided! Exiting...')
+        exit(11)
+
+    report_path = report_directory + os.sep + term + '-librarymovies-' + timestamp + '.xls'
+    librarymovies.run(term, db, report_path)
 
 # close all connections
 db.close()

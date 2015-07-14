@@ -17,3 +17,9 @@ ssh_pass = #password on ssh proxy
 
 [LOG]
 log_file = nau-bb-reporting.log
+
+[WEBDAV]
+host = # address of server
+user = # username with Read access to entire content system (preferably NOT write or remove)
+pass = # password of above username
+

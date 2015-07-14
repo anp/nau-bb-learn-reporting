@@ -37,6 +37,7 @@ from bblearn.course_main cm, bblearn.course_contents cc, bblearn.course_contents
    AND f.link_name LIKE '%.htm%'
    AND f.pk1 = ccf.files_pk1
    AND ccf.course_contents_pk1 = cc.pk1
+   AND cc.available_ind = 'Y'
    AND cc.cnthndlr_handle = 'resource/x-bb-file'
    AND cc.crsmain_pk1 = cm.pk1
    AND cm.course_id LIKE :course_id_like
@@ -46,7 +47,8 @@ from bblearn.course_main cm, bblearn.course_contents cc, bblearn.course_contents
 def run(term, connection, out_file_path, greedy=False):
     log.info("Running hardlinks report for %s.", term)
 
-    found_course_ids = set()
+    course_ids = set()
+    found_course_ids = []
     course_id_patterns = [term + '-NAU00-' + letter + '%' for letter in ascii_uppercase]
 
     if greedy:
@@ -57,7 +59,7 @@ def run(term, connection, out_file_path, greedy=False):
         for pattern in course_id_patterns:
             greedy_cur.execute(None, course_id_like=pattern)
             for row in greedy_cur:
-                found_course_ids.add(row[0])
+                found_course_ids.append((row[0], 'HTML FILE'))
 
     main_cur = connection.cursor()
     main_cur.prepare(lazy_query)
@@ -67,17 +69,19 @@ def run(term, connection, out_file_path, greedy=False):
         for row in main_cur:
             course_id = row[0]
             html = row[1]
-            if course_id not in found_course_ids and has_hard_links(html):
-                found_course_ids.add(course_id)
+            found_link = get_first_hardlink(html)
+            if course_id not in course_ids and found_link is not None:
+                found_course_ids.append((course_id, found_link))
+                course_ids.add(course_id)
 
     log.info('Found all courses, writing to report file.')
-    header = ['course id']
+    header = ['course id', 'link found']
     df = pd.DataFrame([x for x in found_course_ids], columns=header)
-    df.to_excel(out_file_path, sheet_name=term + ' Hardlink courses', encoding='UTF-8', columns=header)
+    df.to_excel(out_file_path, sheet_name=term + ' Hardlink courses', encoding='UTF-8', columns=header, index=False)
     log.info('Wrote report to %s', out_file_path)
 
 
-def has_hard_links(html_content):
+def get_first_hardlink(html_content):
     soup = BeautifulSoup(html_content)
 
     urls = [link.get('href') for link in soup.find_all('a')]
@@ -93,10 +97,13 @@ def has_hard_links(html_content):
 
         url = trimmed.replace(' ', '%20')
         url = url.replace('@X@EmbeddedFile.requestUrlStub@X@', 'https://bblearn.nau.edu/')
-        url = url.replace('@X@EmbeddedFile.location@X@', 'https://bblearn.nau.edu/')
+        url = url.lower()
 
         if 'iris.nau.edu/owa/redir.aspx' in url:
-            return True
+            return url
+
+        elif 'about:blank' == url:
+            continue
 
         elif 'xid' in url and 'bbcswebdav' in url:
             continue
@@ -107,22 +114,31 @@ def has_hard_links(html_content):
         elif '/images/ci/' in url:
             continue
 
-        elif ('courses' in url or 'webapps' in url or 'bbcswebdav' in url) \
-                and '/execute/viewDocumentation?' not in url \
-                and '/wvms-bb-BBLEARN' not in url \
-                and '/bb-collaborate-BBLEARN' not in url \
+        elif ('courses' in url or 'webapps' in url or 'bbcswebdav' in url or 'webct' in url or 'vista' in url) \
+                and '/institution/' not in url \
+                and '/execute/viewdocumentation?' not in url \
+                and '/wvms-bb-bblearn' not in url \
+                and '/bb-collaborate-bblearn' not in url \
                 and '/vtbe-tinymce/tiny_mce' not in url \
                 and 'webapps/login' not in url \
-                and 'webapps/portal' not in url:
-            return True
+                and 'webapps/portal' not in url \
+                and 'bbgs-nbc-content-integration-bblearn' not in url \
+                and 'bb-selfpeer-bblearn' not in url:
+            return url
 
         elif not url.startswith('https://') and \
                 not url.startswith('http://') and \
+                not url.startswith('www') and \
                 not url.startswith('javascript:') and \
                 not url.startswith('mailto:') and \
                 not url.startswith('#') and \
                 not url.startswith('data:image/') and \
-                        'webapps' not in url:
-            return True
+                        'webapps' not in url and \
+                        '.com' not in url and \
+                        '.net' not in url and \
+                        '.edu' not in url and \
+                        '.org' not in url and \
+                        'http://cdn.slidesharecdn.com/' not in url:
+            return url
 
-    return False
+    return None
