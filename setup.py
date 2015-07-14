@@ -16,6 +16,5 @@ setup(name="nau-bb-learn-reporting",
           "pandas>=0.16.2",
           "xlwt>=1.0.0",
           "beautifulsoup4>=4.3.2",
-          "easywebdav>=1.2.0"
       ],
       )

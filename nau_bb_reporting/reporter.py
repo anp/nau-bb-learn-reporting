@@ -15,11 +15,6 @@ import nau_bb_reporting.reports.force_completion as force_completion
 import nau_bb_reporting.reports.hardlinks as hardlinks
 import nau_bb_reporting.reports.mediafiles as mediafiles
 import nau_bb_reporting.reports.librarymovies as librarymovies
-import nau_bb_reporting.reports.content_system.mediafiles as cs_mediafiles
-
-
-
-
 
 
 # parse arguments
@@ -50,11 +45,6 @@ ssh_port = int(ssh_conf.get('port', 22))
 local_port = int(ssh_conf.get('local_port', 1521))
 ssh_user = ssh_conf['user']
 ssh_pass = ssh_conf['pass']
-
-webdav_config = config['WEBDAV']
-wd_host = webdav_config['host']
-wd_user = webdav_config['user']
-wd_pass = webdav_config['pass']
 
 # validate configuration
 if db_host is None or db_port is None or db_user is None or db_pass is None:
@@ -124,12 +114,7 @@ elif report == 'mediafiles':
         exit(10)
 
     report_path = report_directory + os.sep + term + '-mediafiles-' + timestamp + '.xls'
-
-    if greedy:
-        cs_mediafiles.run(webdav_host=wd_host, webdav_user=wd_user, webdav_pass=wd_pass, connection=db,
-                          out_file_path=report_path, term=term)
-    else:
-        mediafiles.run(term=term, connection=db, out_file_path=report_path)
+    mediafiles.run(term=term, connection=db, out_file_path=report_path)
 
 elif report == 'librarymovies':
     if term is None:
