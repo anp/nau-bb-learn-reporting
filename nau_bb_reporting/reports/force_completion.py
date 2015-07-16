@@ -75,8 +75,9 @@ def run(term, connection, out_file_path):
         reverse_path = sub_cur.fetchone()[0]
 
         path_list = list(reversed(reverse_path.split("><")))
-        path_list = [e.replace('VISTA_ORGANIZER_PAGES.label', 'Course Content') for e in path_list]
-        path_list = [e.replace('COURSE_DEFAULT.Content.CONTENT_LINK.label', 'Content') for e in path_list]
+        path_list = [e.replace(
+            'VISTA_ORGANIZER_PAGES.label', 'Course Content').replace(
+            'COURSE_DEFAULT.Content.CONTENT_LINK.label', 'Content') for e in path_list]
 
         row['Path to Test'] = " > ".join(path_list[:-2])
 

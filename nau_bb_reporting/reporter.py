@@ -20,6 +20,7 @@ import nau_bb_reporting.reports.orphanedinternal as orphanedinternal
 
 
 
+
 # parse arguments
 args = housekeeping.parse_parameters()
 
@@ -91,7 +92,7 @@ report = args['report']
 greedy = args['greedy']
 if report == 'stale-courses':
     # run stale courses report
-    report_path = report_directory + os.sep + 'stale-courses-' + term + timestamp + '.xls'
+    report_path = report_directory + os.sep + 'stale-courses-' + term + '-' + timestamp + '.xls'
     stale_courses.run(connection=db, out_file_path=report_path)
 
 elif report == 'force-completion':
@@ -99,7 +100,7 @@ elif report == 'force-completion':
         log.error("Trying to run force completion report, but no term provided! Exiting...")
         exit(8)
 
-    report_path = report_directory + os.sep + 'force-completion-' + term + timestamp + '.xls'
+    report_path = report_directory + os.sep + 'force-completion-' + term + '-' + timestamp + '.xls'
     force_completion.run(term=term, connection=db, out_file_path=report_path)
 
 elif report == 'hardlinks':
@@ -108,7 +109,7 @@ elif report == 'hardlinks':
         exit(9)
 
     report_type = 'greedy-' if greedy else 'lazy-'
-    report_path = report_directory + os.sep + 'hardlinks-' + report_type + term + timestamp + '.xls'
+    report_path = report_directory + os.sep + 'hardlinks-' + report_type + term + '-' + timestamp + '.xls'
     hardlinks.run(term=term, connection=db, out_file_path=report_path, greedy=greedy)
 
 elif report == 'mediafiles':
@@ -118,7 +119,7 @@ elif report == 'mediafiles':
 
     media_config = config['MEDIA FILES']
 
-    report_path = report_directory + os.sep + 'mediafiles-' + term + timestamp + '.xls'
+    report_path = report_directory + os.sep + 'mediafiles-' + term + '-' + timestamp + '.xls'
 
     mediafiles.run(term=term, connection=db, out_file_path=report_path, threshold=media_config['mb_threshold'],
                    pattern=media_config['filename_pattern'])
@@ -128,7 +129,7 @@ elif report == 'librarymovies':
         log.error('Cannor run library movies report, no term was provided! Exiting...')
         exit(11)
 
-    report_path = report_directory + os.sep + 'librarymovies-' + term + timestamp + '.xls'
+    report_path = report_directory + os.sep + 'librarymovies-' + term + '-' + timestamp + '.xls'
 
     librarymovies.run(term, db, report_path)
 

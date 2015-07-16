@@ -4,8 +4,6 @@ import logging
 
 import pandas as pd
 
-from nau_bb_reporting.housekeeping import rows_to_dict_list
-
 log = logging.getLogger('nau_bb_reporting.reports.mediafiles')
 
 query = """
@@ -36,16 +34,11 @@ def run(term, connection, out_file_path, threshold, pattern):
     log.info('Checking all %s courses for media files and other large files...', term)
 
     cur.execute(None, course_id_like=course_id_pattern, mb_threshold=threshold, filename_pattern=pattern)
-    db_results = rows_to_dict_list(cur)
-
-    results = []
-    for result in db_results:
-        course_id = result['FULL_PATH']
-        file_name = result['FILE_NAME']
-        file_size = round(result['FILE_SIZE'] / 1000000, 1)
-        mime_type = result['MIME_TYPE']
-
-        results.append({'FILE PATH': course_id, 'FILENAME': file_name, 'SIZE (MB)': file_size, 'MIME TYPE': mime_type})
+    results = [{'file path': r[0],
+                'file name': r[1],
+                'size (mb)': round(int(r[2]) / 1000000, 1),
+                'mime type': r[3]}
+               for r in cur.fetchall()]
 
     log.info('Found all %s courses and files, writing to report file.', term)
 
