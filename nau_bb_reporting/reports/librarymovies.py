@@ -23,7 +23,7 @@ FROM bblearn.course_main cm, bblearn.course_contents cc, bblearn.course_contents
 
 
 def run(term, connection, out_file_path):
-    log.info("Running media file report for %s.", term)
+    log.info("Running e-reserve file report for %s.", term)
 
     course_id_patterns = [term + '-NAU00-' + letter + '%' for letter in ascii_uppercase]
 
@@ -43,5 +43,5 @@ def run(term, connection, out_file_path):
 
     log.info('Found all %s courses and files, writing to report file.', term)
 
-    df.to_excel(out_file_path, sheet_name=term + ' Hardlink courses', encoding='UTF-8', index=False)
+    df.to_excel(out_file_path, encoding='UTF-8', index=False)
     log.info('Wrote report to %s', out_file_path)

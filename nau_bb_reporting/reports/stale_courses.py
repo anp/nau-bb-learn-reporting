@@ -40,6 +40,6 @@ def run(connection, out_file_path):
     df = pd.DataFrame(cur.fetchall(), columns=result_columns)
 
     log.info("Writing to excel file...")
-    df.to_excel(out_file_path, sheet_name='stale non-credit courses', index=False, encoding='UTF-8', na_rep='N/A')
+    df.to_excel(out_file_path, index=False, encoding='UTF-8', na_rep='N/A')
 
     log.info("Done with stale courses report!")

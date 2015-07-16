@@ -83,7 +83,7 @@ def run(term, connection, out_file_path):
     df = pd.DataFrame(results)
 
     log.info("Writing to excel file...")
-    df.to_excel(out_file_path, sheet_name='stale non-credit courses', columns=result_columns, index=False,
+    df.to_excel(out_file_path, columns=result_columns, index=False,
                 encoding='UTF-8', na_rep='N/A')
 
     log.info("Done with force completion report!")

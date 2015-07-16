@@ -1,0 +1,18 @@
+************************************************************************************************************************
+Find courses & items where NBC Learn is in use:
+
+SELECT DISTINCT
+  u.USER_ID,
+  u.EMAIL,
+  cm.COURSE_ID,
+  cc.TITLE
+FROM BBLEARN.COURSE_MAIN cm, BBLEARN.COURSE_CONTENTS cc, BBLEARN.COURSE_USERS cu, BBLEARN.USERS u
+WHERE
+  u.PK1 = cu.USERS_PK1
+  AND cu.ROLE = 'P'
+  AND cu.CRSMAIN_PK1 = cm.PK1
+  AND cm.PK1 = cc.CRSMAIN_PK1
+  AND cc.CNTHNDLR_HANDLE = 'resource/x-bbgs-nbc-contentintegration'
+ORDER BY u.USER_ID, cm.COURSE_ID
+
+************************************************************************************************************************

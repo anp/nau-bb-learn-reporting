@@ -16,9 +16,8 @@ SELECT
   f.MIME_TYPE
   from BBLEARN_CMS_DOC.XYF_URLS u, BBLEARN_CMS_DOC.XYF_FILES f
 where
-  (REGEXP_LIKE(u.FILE_NAME,
-               '^(.+)\.(aiff|wav|flac|m4a|wma|mp3|aac|ra|rm|aup|mid|3gp|avi|flv|m1v|m2v|fla|m4v|mkv|mov|mpeg|mpg|swf|wmv)$',
-               'i')
+  ((REGEXP_LIKE(u.FILE_NAME, '^(.+)\.(' || :filename_pattern ||')$', 'i')
+    AND f.file_size > 1000000)
    OR (f.file_size > (:mb_threshold * 1000000))
   )
   AND f.MIME_TYPE <> 'trash' AND f.MIME_TYPE IS NOT NULL
@@ -27,7 +26,7 @@ where
 """
 
 
-def run(term, connection, out_file_path):
+def run(term, connection, out_file_path, threshold, pattern):
     log.info("Running media file report for %s.", term)
 
     course_id_pattern = term + '-NAU00-%'
@@ -36,7 +35,7 @@ def run(term, connection, out_file_path):
     cur.prepare(query)
     log.info('Checking all %s courses for media files and other large files...', term)
 
-    cur.execute(None, course_id_like=course_id_pattern, mb_threshold=100)
+    cur.execute(None, course_id_like=course_id_pattern, mb_threshold=threshold, filename_pattern=pattern)
     db_results = rows_to_dict_list(cur)
 
     results = []
@@ -51,5 +50,5 @@ def run(term, connection, out_file_path):
     log.info('Found all %s courses and files, writing to report file.', term)
 
     df = pd.DataFrame(results)
-    df.to_excel(out_file_path, sheet_name=term + ' Hardlink courses', encoding='UTF-8', index=False)
+    df.to_excel(out_file_path, encoding='UTF-8', index=False)
     log.info('Wrote report to %s', out_file_path)

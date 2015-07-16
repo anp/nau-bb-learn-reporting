@@ -18,3 +18,8 @@ ssh_pass = #password on ssh proxy
 [LOG]
 log_file = nau-bb-reporting.log
 
+[MEDIA FILES]
+# in MB
+mb_threshold = 50
+# pipe-separated (for regex) filename extensions
+filename_pattern = aiff|wav|flac|m4a|wma|mp3|aac|ra|rm|aup|mid|3gp|avi|flv|m1v|m2v|fla|m4v|mkv|mov|mpeg|mpg|swf|wmv

@@ -77,7 +77,7 @@ def run(term, connection, out_file_path, greedy=False):
     log.info('Found all courses, writing to report file.')
     header = ['course id', 'link found']
     df = pd.DataFrame([x for x in found_course_ids], columns=header)
-    df.to_excel(out_file_path, sheet_name=term + ' Hardlink courses', encoding='UTF-8', columns=header, index=False)
+    df.to_excel(out_file_path, encoding='UTF-8', columns=header, index=False)
     log.info('Wrote report to %s', out_file_path)
 
 
