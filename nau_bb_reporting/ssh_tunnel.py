@@ -1,7 +1,16 @@
-# adapted from:
-# https://github.com/paramiko/paramiko/blob/master/demos/forward.py
-# http://stackoverflow.com/questions/2777884/shutting-down-ssh-tunnel-in-paramiko-programatically
+"""
+adapted from:
+https://github.com/paramiko/paramiko/blob/master/demos/forward.py
+http://stackoverflow.com/questions/2777884/shutting-down-ssh-tunnel-in-paramiko-programatically
 
+This adaptation keeps the tunnel alive in a background thread while the reports run.
+The paramiko example is a blocking tunnel, not suitable to be built into a tool.
+
+This should ideally be implemented as a class that contains a Handler and SSHClient,
+but the scale of this project is small enough that using a couple of globals is fine.
+A CLI tool probably shouldn't be expanded to run multiple tunnels in the same process.
+If it needs to be, then just turn this into an object with state.
+"""
 __author__ = 'adam'
 import select
 import logging
@@ -48,7 +57,6 @@ class Handler(SocketServer.BaseRequestHandler):
                 if len(data) == 0:
                     break
                 self.request.send(data)
-
 
 def setup_tunnel(ssh_host, ssh_port, ssh_user, ssh_pass, local_port, remote_host, remote_port):
     global ssh_client

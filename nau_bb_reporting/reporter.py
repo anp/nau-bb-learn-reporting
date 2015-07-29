@@ -1,3 +1,33 @@
+"""
+Run using:
+
+python3 reporter.py --config config.ini [--term {termcode}] {report-name}
+
+Only one report will be run per invocation. If multiple reports are listed,
+behavior is undefined. If no term is passed to a term-specific report, the
+report will be either run against all terms (can be VERY time-consuming on most of
+the reports) or will error out if it's too tailored to specific terms.
+
+A single Excel spreadsheet will be written to the report directory specified
+in the config file. See configuration example file for documentation of
+config parameters.
+
+Extending this tool with more reports should be kinda not really painless.
+It's pretty straightforward, but just to be sure, this is how the current
+reports were all added:
+
+1) Add a new report name to the options in housekeeping.py
+2) Add a conditional below to check report == 'new_report_name'
+3) Inside conditional, define a report path, and any configuration options. Any config options
+    need to be added to the config file and parsed appropriately.
+4) Add a new file to the reports package
+5) Copy one of the simpler reports and replace queries and processing as needed.
+    Use pandas to create a DataFrame from the list of tuples or dicts, and write to excel.
+6) Import that report file here, and add a run command in the appropriate conditional.
+
+See? Not hard at all.
+"""
+
 __author__ = 'adam'
 
 import configparser
@@ -14,15 +44,12 @@ import nau_bb_reporting.reports.stale_courses as stale_courses
 import nau_bb_reporting.reports.force_completion as force_completion
 import nau_bb_reporting.reports.hardlinks as hardlinks
 import nau_bb_reporting.reports.mediafiles as mediafiles
-import nau_bb_reporting.reports.librarymovies as librarymovies
 import nau_bb_reporting.reports.orphanedinternal as orphanedinternal
 
 
 
-
-
 # parse arguments
-args = housekeeping.parse_parameters()
+args = housekeeping.parse_cli_arguments()
 
 # read configuration
 config = configparser.ConfigParser()
@@ -30,6 +57,7 @@ config = configparser.ConfigParser()
 config.read(args['config'])
 log_file = config['LOG'].get('file', 'nau-bb-reporting.log')
 
+# setup root logger
 housekeeping.create_root_logger(log_file)
 log = logging.getLogger('nau_bb_reporting.reporter')
 log.debug("Parameters: %s", args)
@@ -83,6 +111,8 @@ p = re.compile('[1][0-9]{2}[1478]')
 if term is not None and p.match(term) is None:
     log.error("Invalid term code provided! Exiting...")
     exit(5)
+elif term is None:
+    term = 'all'
 
 # generate timestamp for reports
 timestamp = time.strftime('%Y-%m-%d_%H%M%S')
@@ -96,15 +126,11 @@ if report == 'stale-courses':
     stale_courses.run(connection=db, out_file_path=report_path)
 
 elif report == 'force-completion':
-    if term is None:
-        log.error("Trying to run force completion report, but no term provided! Exiting...")
-        exit(8)
-
     report_path = report_directory + os.sep + 'force-completion-' + term + '-' + timestamp + '.xls'
     force_completion.run(term=term, connection=db, out_file_path=report_path)
 
 elif report == 'hardlinks':
-    if term is None:
+    if term == 'all':
         log.error("Trying to run hardlinks report, but no term provided! Exiting...")
         exit(9)
 
@@ -113,25 +139,12 @@ elif report == 'hardlinks':
     hardlinks.run(term=term, connection=db, out_file_path=report_path, greedy=greedy)
 
 elif report == 'mediafiles':
-    if term is None:
-        log.error("Cannot run media files report, no term was provided! Exiting...")
-        exit(10)
-
     media_config = config['MEDIA FILES']
 
     report_path = report_directory + os.sep + 'mediafiles-' + term + '-' + timestamp + '.xls'
 
     mediafiles.run(term=term, connection=db, out_file_path=report_path, threshold=media_config['mb_threshold'],
                    pattern=media_config['filename_pattern'])
-
-elif report == 'librarymovies':
-    if term is None:
-        log.error('Cannor run library movies report, no term was provided! Exiting...')
-        exit(11)
-
-    report_path = report_directory + os.sep + 'librarymovies-' + term + '-' + timestamp + '.xls'
-
-    librarymovies.run(term, db, report_path)
 
 elif report == 'orphaned-internal':
     report_path = report_directory + os.sep + 'orphaned-internal-' + timestamp + '.xls'

@@ -35,3 +35,15 @@ WHERE
   AND cm.COURSE_ID LIKE '1157-NAU00-%'
 ORDER BY cm.COURSE_ID, cc.TITLE
 
+
+************************************************************************************************************************
+Find all library e-reserve HTML files in Fall 2015
+Change '1157' to the appropriate term code
+
+SELECT DISTINCT
+  u.FILE_NAME,
+  u.FULL_PATH
+FROM BBLEARN_CMS_DOC.XYF_URLS u
+WHERE
+  REGEXP_LIKE(u.FILE_NAME, '^(DVD|VT|T)[0-9]{2,5}_(.+)\.html$', 'c')
+  AND u.FULL_PATH LIKE '/courses/1157-NAU00-%'
