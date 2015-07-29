@@ -11,7 +11,7 @@ This tool was created to solve a very specific set of niche problems at a partic
 To install:
 
 1. Install Python >=3.4.
-2. Install the Oracle Instant Client: http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html
+2. Install the [Oracle Instant Client](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html)
 3. Clone the repository.
 4. Inside the repo folder, run `python3 setup.py install` (or use whatever python3 alias your system has).
 
