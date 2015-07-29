@@ -1,3 +1,9 @@
+"""
+This report finds all "non-credit" courses which haven't been touched in >1 year.
+
+Goes off of the last access date in the course_users table.
+"""
+
 __author__ = 'adam'
 
 import logging

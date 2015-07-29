@@ -1,3 +1,14 @@
+"""
+This report gets us a list (either entire or by term) of all tests that
+have Force Completion enabled. It also lists the path where they are deployed
+in the course.
+
+Two queries are needed because Oracle doesn't like joining against
+hierarchical subqueries. First we go to the database and get a list of tests
+with Force Completion enabled, and then we go back for each of those tests
+to find out where they are deployed in their course.
+"""
+
 __author__ = 'adam'
 
 import logging
@@ -7,6 +18,7 @@ import pandas as pd
 
 log = logging.getLogger('nau_bb_reporting.reports.force_completion')
 
+# here we get the list of tests that have FC
 first_query = """
 SELECT DISTINCT
     u.user_id,
@@ -34,6 +46,7 @@ WHERE
 ORDER BY u.user_id ASC
 """
 
+# here we find out where they're deployed in the course
 path_query = """
 SELECT
   PATH
@@ -48,6 +61,7 @@ FROM (
 WHERE LEAF = 1
 """
 
+# this keeps pandas writing the file in the correct order
 result_columns = ['PI UID', 'PI First Name', 'PI Last Name', 'PI Email',
                   'Course ID', 'Course Name', 'Test Name', 'Path to Test']
 
@@ -57,9 +71,14 @@ def run(term, connection, out_file_path):
     main_cur = connection.cursor()
     main_cur.prepare(first_query)
 
-    course_id_like = term + '-NAU00-%'
+    # we don't need a pattern to check all terms
+    if term != 'all':
+        course_id_like = term + '-NAU00-%'
+    else:
+        course_id_like = '%'
 
     results = []
+    # get all of the tests, batching by first letter of username of PI
     for letter in ascii_lowercase:
         user_id_like = letter + '%'
         main_cur.execute(None, course_id_like=course_id_like, user_id_like=user_id_like)
@@ -68,12 +87,16 @@ def run(term, connection, out_file_path):
     log.info("Found all %s tests with Force Completion.", term)
     log.info("Finding paths to tests in courses...")
 
+    # find where each test is
     sub_cur = connection.cursor()
     sub_cur.prepare(path_query)
     for row in results:
+        # Path to Test stores the content item PK1 in the previous query
         sub_cur.execute(None, test_pk1=row['Path to Test'])
         reverse_path = sub_cur.fetchone()[0]
 
+        # the hierarchical query returns the path in reverse
+        # also the database stores certain page names as these constant strings
         path_list = list(reversed(reverse_path.split("><")))
         path_list = [e.replace(
             'VISTA_ORGANIZER_PAGES.label', 'Course Content').replace(

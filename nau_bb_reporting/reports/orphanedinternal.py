@@ -1,3 +1,12 @@
+"""
+Checks all course folders in WebDAV against the list of
+valid course IDs. Many courses' internal content is not deleted
+when the course itself is deleted.
+
+Just checks folder names at the /internal/courses/* level
+against the list of valid course IDs.
+"""
+
 __author__ = 'adam'
 
 import logging
@@ -9,7 +18,7 @@ log = logging.getLogger('nau_bb_reporting.reports.orphanedinternal')
 main_query = """
 SELECT
   u.FILE_NAME,
-  f.FILE_SIZE,
+  (f.FILE_SIZE / 1000000) AS FILE_SIZE,
   u.FULL_PATH
 FROM BBLEARN_CMS_DOC.XYF_URLS u, BBLEARN_CMS_DOC.XYF_FILES f
 WHERE

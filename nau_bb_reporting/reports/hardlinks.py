@@ -1,3 +1,19 @@
+"""
+This report looks at all of the course content HTML and tries to find
+links that point back to Bb Learn but are not managed by the LMS or CMS
+(i.e. they are copypasta from a user who was smart but not smart enough).
+
+In a given term, we get all of the course content HTML, and then begin
+ingesting it into BeautifulSoup and grabbing all of the links. The links
+are then checked against a bunch of patterns (developed partially in the
+abstract but also iteratively over dozens of previous reports) to see
+if they're likely candidates.
+
+If "greedy" mode is enabled, we'll also go after all of the deployed
+HTML files in a course, as those very frequently contain bad links.
+"""
+
+
 __author__ = 'adam'
 
 import logging
@@ -8,6 +24,8 @@ from bs4 import BeautifulSoup
 
 log = logging.getLogger('nau_bb_reporting.reports.hardlinks')
 
+# this only gets us all of the HTML with links in a term
+# we have to parse and check the HTML locally
 lazy_query = """
 select
     content_items.course_id,
@@ -28,6 +46,10 @@ bblearn.course_contents cc
 ON cc.pk1 = content_items.pk1
 """
 
+# this only gets us the deployed HTML files in a term
+# this could be extended to actually fetch the files, but that
+# would require a special reporting account with read access
+# to all BbL files, and is not a security hole we want to introduce
 greedy_query = """
 select DISTINCT
   cm.course_id
@@ -49,8 +71,11 @@ def run(term, connection, out_file_path, greedy=False):
 
     course_ids = set()
     found_course_ids = []
+    # splitting this query seems to improve performance, as temp tables are kept small
+    # and we avoid hitting swap (at least that's my guess as to why)
     course_id_patterns = [term + '-NAU00-' + letter + '%' for letter in ascii_uppercase]
 
+    # first get all the deployed HTML files if needed
     if greedy:
         log.info('Retreiving a list of %s courses with deployed HTML files...', term)
         greedy_cur = connection.cursor()
@@ -69,6 +94,8 @@ def run(term, connection, out_file_path, greedy=False):
         for row in main_cur:
             course_id = row[0]
             html = row[1]
+
+            # now we check the HTML for bad links...
             found_link = get_first_hardlink(html)
             if course_id not in course_ids and found_link is not None:
                 found_course_ids.append((course_id, found_link))
@@ -84,10 +111,15 @@ def run(term, connection, out_file_path, greedy=False):
 def get_first_hardlink(html_content):
     soup = BeautifulSoup(html_content)
 
+    # get all of the link urls and the image sources
     urls = [link.get('href') for link in soup.find_all('a')]
     urls.extend([image.get('src') for image in soup.find_all('img')])
 
     for link in urls:
+        # now begin the long fall-through logic
+        # if we get to the bottom, the link isn't a problem
+
+        # first we want to make sure we don't want cycles checking empty text
         if link is None or len(link) == 0:
             continue
 
@@ -95,25 +127,32 @@ def get_first_hardlink(html_content):
         if len(trimmed) == 0:
             continue
 
+        # prep the url for easier conditionals
         url = trimmed.replace(' ', '%20')
         url = url.replace('@X@EmbeddedFile.requestUrlStub@X@', 'https://bblearn.nau.edu/')
         url = url.lower()
 
+        # these don't reference bblearn, but they suck for students
         if 'iris.nau.edu/owa/redir.aspx' in url:
             return url
 
         elif 'about:blank' == url:
             continue
 
+        # if it's an xid in WebDAV then it's probably OK
         elif 'xid' in url and 'bbcswebdav' in url:
             continue
 
+        # if it points outside of bblearn, it's not really our problem (with the exception of OWA links)
         elif (url.startswith('http://') or url.startswith('https://')) and 'bblearn' not in url:
             continue
 
+        # these are placed by the content editor's smiley tool
         elif '/images/ci/' in url:
             continue
 
+        # if it is definitely pointing to Bb Learn, but isn't of the many tools that legitimately
+        # insert links in content items, it's BAD
         elif ('courses' in url or 'webapps' in url or 'bbcswebdav' in url or 'webct' in url or 'vista' in url) \
                 and '/institution/' not in url \
                 and '/execute/viewdocumentation?' not in url \
@@ -126,6 +165,8 @@ def get_first_hardlink(html_content):
                 and 'bb-selfpeer-bblearn' not in url:
             return url
 
+        # if it doesn't points outside of bblearn, and it doesn't specifically point to bblearn
+        # then it's probably a relative link, which we should also burn with fire
         elif not url.startswith('https://') and \
                 not url.startswith('http://') and \
                 not url.startswith('www') and \
@@ -141,4 +182,5 @@ def get_first_hardlink(html_content):
                         'http://cdn.slidesharecdn.com/' not in url:
             return url
 
+    # if we've made it this far, we've checked all urls and found them wanting
     return None
