@@ -1,4 +1,7 @@
 # nau-bb-learn-reporting
+
+#####Note: if you're reading this text editor or as plaintext, there is an HTML version: README.html. Try opening that in a browser.
+
 A basic tool for generating reproducible reports for Blackboard Learn 9.1. Relies on access to a Managed Hosting OpenDB account.
 
 This tool was created to solve a very specific set of niche problems at a particular university. It's a very light framework for connecting to Bb Learn's Oracle database and running pre-defined reports through an optional SSH proxy.
@@ -94,3 +97,17 @@ python3 nau_bb_reporting/reporter.py --config reporting_config.ini orphaned-inte
 ###Changing Reports, Adding New Reports
 
 Read through the source. The comments in `reporter.py` have some basic steps to follow for adding new reports.
+
+###Rendering the HTML README
+
+If you change the README.md, the HTML version will be out of sync. To resolve this, first install [grip](https://github.com/joeyespo/grip):
+
+```bash
+sudo pip install grip
+```
+
+Then, in the base repo folder, re-export the README:
+
+```bash
+grip --export
+```
