@@ -16,3 +16,22 @@ WHERE
 ORDER BY u.USER_ID, cm.COURSE_ID
 
 ************************************************************************************************************************
+
+Find Fall 2015 courses & items which link to or embed the old style streaming media player
+Change the second to last line to match a course ID pattern for a different term
+
+SELECT DISTINCT
+  u.USER_ID,
+  u.EMAIL,
+  cm.COURSE_ID,
+  cc.TITLE
+FROM BBLEARN.COURSE_MAIN cm, BBLEARN.COURSE_CONTENTS cc, BBLEARN.COURSE_USERS cu, BBLEARN.USERS u
+WHERE
+  u.PK1 = cu.USERS_PK1
+  AND cu.ROLE = 'P'
+  AND cu.CRSMAIN_PK1 = cm.PK1
+  AND cc.MAIN_DATA LIKE '%https://jan.ucc.nau.edu/~d-ctel/mediaPlayer%'
+  AND cc.CRSMAIN_PK1 = cm.PK1
+  AND cm.COURSE_ID LIKE '1157-NAU00-%'
+ORDER BY cm.COURSE_ID, cc.TITLE
+
