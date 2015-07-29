@@ -60,6 +60,35 @@ optional arguments:
                         Ignored otherwise.
 ```
 
+Some example commands (assuming they are run from the root of the repository where the example config was convered to an actual ini):
+
+Force Completion doesn't require a term flag, but will probably take a long time (and be a huge file) if it runs w/o a term:
+```bash
+python3 nau_bb_reporting/reporter.py --config reporting_config.ini --term 1157 force-completion
+python3 nau_bb_reporting/reporter.py --config reporting_config.ini force-completion
+```
+
+Hardlinks reports require a term because the report is rather bandwidth intensive:
+```bash
+python3 nau_bb_reporting/reporter.py --config reporting_config.ini --term 1157 hardlinks
+```
+
+Stale courses reports will ignore the termcode, so don't bother:
+```bash
+python3 nau_bb_reporting/reporter.py --config reporting_config.ini stale-courses
+```
+
+Media files reporting does not require a term, but is rather long-running without it:
+```bash
+python3 nau_bb_reporting/reporter.py --config reporting_config.ini --term 1157 mediafiles
+python3 nau_bb_reporting/reporter.py --config reporting_config.ini mediafiles
+```
+
+Orphaned internal content ignores termcodes, so don't bother:
+```bash
+python3 nau_bb_reporting/reporter.py --config reporting_config.ini orphaned-internal
+```
+
 ###Changing Reports, Adding New Reports
 
 Read through the source. The comments in `reporter.py` have some basic steps to follow for adding new reports.
