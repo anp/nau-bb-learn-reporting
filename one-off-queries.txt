@@ -47,3 +47,15 @@ FROM BBLEARN_CMS_DOC.XYF_URLS u
 WHERE
   REGEXP_LIKE(u.FILE_NAME, '^(DVD|VT|T)[0-9]{2,5}_(.+)\.html$', 'c')
   AND u.FULL_PATH LIKE '/courses/1157-NAU00-%'
+
+************************************************************************************************************************
+Find all courses with an active enrollment manager in the institutional hierarchy
+
+select distinct cm.course_id, cm.course_name
+from bblearn.domain d, bblearn.domain_course_coll dc, bblearn.course_main cm, bblearn.domain_admin da 
+where d.pk1 = dc.domain_pk1
+  and cm.pk1 = dc.course_main_pk1
+  and cm.course_id LIKE '%.ZERO-CREDIT'
+  and da.domain_pk1 = d.pk1
+  and da.system_role = 'ENROLLMENT-MANAGER'
+order by cm.course_name
